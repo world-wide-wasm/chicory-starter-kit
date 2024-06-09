@@ -1,6 +1,8 @@
 package garden.bots.starter;
 
+import com.dylibso.chicory.log.SystemLogger;
 import com.dylibso.chicory.runtime.ExportFunction;
+import com.dylibso.chicory.wasi.WasiOptions;
 import com.dylibso.chicory.wasm.types.Value;
 import com.dylibso.chicory.runtime.Module;
 import com.dylibso.chicory.runtime.Instance;
@@ -9,6 +11,7 @@ import com.dylibso.chicory.runtime.HostImports;
 import com.dylibso.chicory.runtime.HostFunction;
 import com.dylibso.chicory.wasm.types.ValueType;
 
+import com.dylibso.chicory.wasi.WasiPreview1;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -28,7 +31,7 @@ public class Main {
 
         // Create fd_write method to avoid this warning message:
         // "WARNING: Could not find host function for import number: 0 named wasi_snapshot_preview1.fd_write"
-        
+        /*
         var fd_write = new HostFunction(
                 (Instance instance, Value... params) -> {
                     return null;
@@ -37,11 +40,24 @@ public class Main {
                 "fd_write",
                 List.of(ValueType.I32, ValueType.I32),
                 List.of());
+         */
 
-        var imports = new HostImports(new HostFunction[] {fd_write});
+        //var imports = new HostImports(new HostFunction[] {fd_write});
 
-        Module module = Module.builder(new File(wasmFileLocalLocation)).build().withHostImports(imports);
-        Instance instance = module.instantiate();
+
+        //https://github.com/dylibso/chicory/tree/main/wasi#how-to-use
+        var logger = new SystemLogger();
+        // let's just use the default options for now
+        var options = WasiOptions.builder().build();
+        // create our instance of wasip1
+        var wasi = new WasiPreview1(logger, WasiOptions.builder().build());
+        // turn those into host imports. Here we could add any other custom imports we have
+        var imports = new HostImports(wasi.toHostFunctions());
+
+        // create the module
+        var module = Module.builder(new File(wasmFileLocalLocation)).build().withHostImports(imports);
+        // instantiate and connect our imports, this will execute the module
+        var instance = module.instantiate();
 
         // automatically exported by TinyGo
         ExportFunction malloc = instance.export("malloc");

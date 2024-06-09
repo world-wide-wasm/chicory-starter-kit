@@ -22,6 +22,12 @@
             <version>0.0.10</version>
         </dependency>
         <!-- Chicory -->
+
+        <dependency>
+            <groupId>com.dylibso.chicory</groupId>
+            <artifactId>wasi</artifactId>
+            <version>0.0.10</version>
+        </dependency>
     </dependencies>
 
     <build>
